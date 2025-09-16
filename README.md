@@ -81,43 +81,6 @@ Rscript CXCL13_expression.R
 - **Forest plots (multivariable)**: `forestplot_*`
 - **Sample lists**: `CXCL13_highrisk_samples.csv`, `CXCL13_lowrisk_samples.csv`
 
-## 📊 What the Script Does
-
-The analysis pipeline performs the following steps:
-
-1. **Data Loading & Preprocessing**
-   - Loads the CSV and constructs survival objects with 5-year (60-month) administrative censoring
-   - Splits CXCL13 expression at the 75th percentile to define high vs low groups
-
-2. **Survival Analysis**
-   - Produces Kaplan–Meier curves with log-rank p-values, confidence bands, and HR/C-index annotations
-   - Fits Cox models for both OS and PFS:
-     - **Univariable** (CXCL13 high vs low)
-     - **Multivariable** adjusted for age, sex, and stage
-     - Includes a Stage I/II vs III/IV collapse to reduce separation issues
-
-3. **Output Generation**
-   - Generates forest plots with fallbacks if factor separation causes instability
-   - Exports GSEA-ready sample lists for high/low CXCL13 groups
-
-## 🗂 Data
-
-The analysis expects a CSV with at least these columns (TCGA-style):
-
-| Column | Description |
-|--------|-------------|
-| `Overall_Survival_Months` | Overall survival time |
-| `Overall_Survival_Status` | Overall survival status |
-| `Progress_Free_Survival_Months` | Progression-free survival time |
-| `Progression_Free_Status` | Progression-free survival status* |
-| `Neoplasm_Disease_Stage_American_Joint_Committee_on_Cancer_Code` | Cancer stage |
-| `Diagnosis_Age` | Age at diagnosis |
-| `Sex` | Patient sex |
-| `Sample_ID` | Sample identifier |
-| `CXCL13_expression` | CXCL13 expression values |
-
-> ***Note**: May also be named `Disease_Free_*` in some datasets
-
 ## 📑 How to Cite
 
 If you use this code or figures, please cite:
