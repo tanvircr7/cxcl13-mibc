@@ -28,13 +28,11 @@ Reproducible analysis and figures for our study evaluating CXCL13 expression as 
 └── README.md
 ```
 
-> **Note**: If you cannot redistribute the full CSV, keep a small example snippet in `data/` and add download instructions (see [Data](#data) section below).
-
 ## 🧰 Requirements
 
 - **R** ≥ 4.1 (tested with 4.3–4.5)
 - **R packages**: `survival`, `survminer`, `ggplot2`, `ggpubr`
-- **Linux users** may need system libraries for plotting & compilation (see [Troubleshooting](#troubleshooting))
+- **Linux users** may need system libraries for plotting & compilation
 
 ### Optional (Linux) – Faster Binary Installs
 
