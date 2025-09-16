@@ -19,3 +19,26 @@ Thumbs.db
 *~
 *.tmp
 *.temp
+
+
+# Data
+data/raw/*
+!data/raw/.placeholder
+# data/processed/*.csv
+# !data/processed/.keep
+
+# Big files
+*.rds
+*.RData
+
+# Plots/outputs (keep if you want to show figures)
+# outputs/*
+# !outputs/plots/*
+
+# Python/R build artifacts
+__pycache__/
+.Rhistory
+.Rproj.user
+
+
+.venv

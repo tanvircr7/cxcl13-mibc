@@ -7,7 +7,7 @@ library(survival)
 library(survminer)
 
 # --- 2) Load & preprocess --------------------------------------------------
-df <- read.csv("./data/tcga_pancanceraltas_with_CXCL13subgroups.csv",
+df <- read.csv("./data/processed/tcga_pancanceraltas_with_CXCL13subgroups.csv",
                stringsAsFactors = FALSE)
 
 # --- Optional: Filter by tumor stage --------------------------------------
