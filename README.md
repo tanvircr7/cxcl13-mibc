@@ -118,52 +118,6 @@ The analysis expects a CSV with at least these columns (TCGA-style):
 
 > ***Note**: May also be named `Disease_Free_*` in some datasets
 
-**If you cannot include TCGA data in the repo**, add a short `data/README.md` describing how to obtain it from GDC/Firehose and how to preprocess to this schema.
-
-### Error: "no package called 'survminer'"
-
-**Solution**: Install required packages from R:
-
-```r
-install.packages(c("survival","survminer","ggplot2","ggpubr"))
-```
-
-### Linux compile errors (e.g., png/jpeg/xml2, Fortran, nloptr)
-
-Install system dependencies, then reinstall R packages.
-
-**Ubuntu/Debian:**
-
-```bash
-sudo apt update
-sudo apt install -y \
-  build-essential gfortran pkg-config \
-  libcurl4-openssl-dev libxml2-dev \
-  libpng-dev libjpeg-dev libtiff5-dev \
-  libfontconfig1-dev libfreetype6-dev libharfbuzz-dev libfribidi-dev \
-  libblas-dev liblapack-dev libnlopt-dev
-```
-
-**Fedora/RHEL:**
-
-```bash
-sudo dnf groupinstall -y "Development Tools"
-sudo dnf install -y \
-  gcc-gfortran pkgconfig \
-  libcurl-devel libxml2-devel \
-  libpng-devel libjpeg-turbo-devel libtiff-devel \
-  freetype-devel fontconfig-devel harfbuzz-devel fribidi-devel \
-  blas-devel lapack-devel nlopt-devel
-```
-
-### KM plots warn about "colour : 'CXCL13 group'"
-
-This is a harmless message from ggpubr/survminer; plots still render correctly.
-
-### Cox model warnings: "coefficient may be infinite"
-
-This is typical with sparse stage levels. Use the Stage2 collapsed plots included in outputs; they mitigate separation issues.
-
 ## 📑 How to Cite
 
 If you use this code or figures, please cite:
