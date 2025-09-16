@@ -1,10 +1,5 @@
 #!/usr/bin/env Rscript
 
-# --- Output folder (Linux/Windows safe) -----------------------------------
-OUT_DIR <- "output"
-if (!dir.exists(OUT_DIR)) dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
-
-
 # --- 1) Packages -----------------------------------------------------------
 if (!requireNamespace("survival", quietly=TRUE)) install.packages("survival")
 if (!requireNamespace("survminer", quietly=TRUE)) install.packages("survminer")
@@ -17,7 +12,7 @@ df <- read.csv("./data/tcga_pancanceraltas_with_CXCL13subgroups.csv",
 
 # --- Optional: Filter by tumor stage --------------------------------------
 # df <- df[df$Neoplasm_Disease_Stage_American_Joint_Committee_on_Cancer_Code %in% c("STAGE III","STAGE IV"), ]
-# 
+
 # --- 3) Survival variables + 5-year (60 mo) administrative censoring ------
 df$OS_time   <- suppressWarnings(as.numeric(df$Overall_Survival_Months))
 df$OS_event  <- as.numeric(grepl("^1", df$Overall_Survival_Status))
@@ -86,24 +81,27 @@ cidx_dfs <- s_dfs$concordance[1]
 # Add annotations (place just under the p-value)
 lab_os  <- sprintf("HR = %.2f (%.2f–%.2f)\nC-index = %.3f", hr_os,  lcl_os,  ucl_os,  cidx_os)
 lab_dfs <- sprintf("HR = %.2f (%.2f–%.2f)\nC-index = %.3f", hr_dfs, lcl_dfs, ucl_dfs, cidx_dfs)
-p_os$plot  <- p_os$plot  + annotate("text", x = 0.65 * xmax_os,  y = 0.21, label = lab_os,  hjust = 0, size = 3.8)
-p_dfs$plot <- p_dfs$plot + annotate("text", x = 0.65 * xmax_dfs, y = 0.21, label = lab_dfs, hjust = 0, size = 3.8)
+p_os$plot  <- p_os$plot  + annotate("text", x = 0.65 * xmax_os,  y = 0.21, label = lab_os,  hjust = 0, size = 4.8)
+p_dfs$plot <- p_dfs$plot + annotate("text", x = 0.65 * xmax_dfs, y = 0.21, label = lab_dfs, hjust = 0, size = 4.8)
+png("plots/km_os_CXCL13_annot.png",  width = 1800, height = 1500, res = 200)
+print(p_os)   # draws the combined grob to the device
+dev.off()
 
-# --- 6) Save plots ----------------------------------------------------------
-ggsave(file.path(OUT_DIR, "km_os_CXCL13_annot.png"),  plot = p_os$plot,  width = 7, height = 6, dpi = 150)
-ggsave(file.path(OUT_DIR, "km_dfs_CXCL13_annot.png"), plot = p_dfs$plot, width = 7, height = 6, dpi = 150)
+png("plots/km_dfs_CXCL13_annot.png", width = 1800, height = 1500, res = 200)
+print(p_dfs)
+dev.off()
 
-# risk tables & combined (guard if table is a ggplot)
-if (inherits(p_os$table, "ggplot"))
-  ggsave(file.path(OUT_DIR, "km_os_CXCL13_risktable.png"),  plot = p_os$table,  width = 7, height = 2.5, dpi = 150)
-if (inherits(p_dfs$table, "ggplot"))
-  ggsave(file.path(OUT_DIR, "km_dfs_CXCL13_risktable.png"), plot = p_dfs$table, width = 7, height = 2.5, dpi = 150)
 
+# --- 6) Save plots (save actual ggplot objects) ----------------------------
+ggsave("km_os_CXCL13_annot.png",  plot = p_os$plot,  width = 7, height = 6, dpi = 150)
+ggsave("km_dfs_CXCL13_annot.png", plot = p_dfs$plot, width = 7, height = 6, dpi = 150)
+# Optional: risk tables & combined figures
+ggsave("km_os_CXCL13_risktable.png",  plot = p_os$table,  width = 7, height = 2.5, dpi = 150)
+ggsave("km_dfs_CXCL13_risktable.png", plot = p_dfs$table, width = 7, height = 2.5, dpi = 150)
 os_combined  <- arrange_ggsurvplots(list(p_os),  print = FALSE)
 dfs_combined <- arrange_ggsurvplots(list(p_dfs), print = FALSE)
-ggsave(file.path(OUT_DIR, "km_os_CXCL13_combined.png"),  plot = os_combined,  width = 7, height = 8, dpi = 150)
-ggsave(file.path(OUT_DIR, "km_dfs_CXCL13_combined.png"), plot = dfs_combined, width = 7, height = 8, dpi = 150)
-
+ggsave("km_os_CXCL13_combined.png",  plot = os_combined,  width = 7, height = 8, dpi = 150)
+ggsave("km_dfs_CXCL13_combined.png", plot = dfs_combined, width = 7, height = 8, dpi = 150)
 
 # --- 7) Multivariable Cox (Age + Sex + Stage adjusted) --------------------
 # Encode covariates
@@ -135,127 +133,17 @@ fmt <- function(fit) {
 cat("\nTidy OS:\n");  print(fmt(cox_multi_os))
 cat("\nTidy PFS:\n"); print(fmt(cox_multi_dfs))
 
-
 # --- 8) Export patient lists for GSEA --------------------------------------
 if (!("Sample_ID" %in% colnames(df))) stop("❌ Column 'Sample_ID' not found in the dataframe.")
+write.csv(df[df$CXCL13 == "high", c("Sample_ID", "CXCL13_expression")],
+          "CXCL13_highrisk_samples.csv",
+          row.names = FALSE)
+write.csv(df[df$CXCL13 == "low",  c("Sample_ID", "CXCL13_expression")],
+          "CXCL13_lowrisk_samples.csv",
+          row.names = FALSE)
+cat("\n✅ Saved patient lists for GSEA:\n - CXCL13_highrisk_samples.csv\n - CXCL13_lowrisk_samples.csv\n")
 
-write.csv(
-  df[df$CXCL13 == "high", c("Sample_ID", "CXCL13_expression")],
-  file = file.path(OUT_DIR, "CXCL13_highrisk_samples.csv"),
-  row.names = FALSE
-)
-
-write.csv(
-  df[df$CXCL13 == "low", c("Sample_ID", "CXCL13_expression")],
-  file = file.path(OUT_DIR, "CXCL13_lowrisk_samples.csv"),
-  row.names = FALSE
-)
-
-cat("\n✅ Saved patient lists for GSEA in 'output/':\n - CXCL13_highrisk_samples.csv\n - CXCL13_lowrisk_samples.csv\n")
-
-# --- Forest plots with safe fallbacks --------------------------------------
-suppressPackageStartupMessages({
-  library(ggplot2)
-})
-
-# helper: make a ggplot forest from summary(coxph) (skips infinite rows)
-manual_forest <- function(fit, title = "Forest plot", file = "forest.png") {
-  s <- summary(fit)
-  dfp <- data.frame(
-    term = rownames(s$coefficients),
-    HR   = s$conf.int[,"exp(coef)"],
-    LCL  = s$conf.int[,"lower .95"],
-    UCL  = s$conf.int[,"upper .95"],
-    p    = s$coefficients[,"Pr(>|z|)"],
-    row.names = NULL, check.names = FALSE
-  )
-  # drop non-finite rows (the culprits)
-  dfp <- dfp[is.finite(dfp$HR) & is.finite(dfp$LCL) & is.finite(dfp$UCL), , drop = FALSE]
-  if (nrow(dfp) == 0) stop("No finite coefficients to plot.")
-  
-  # nicer labels: turn "SexMale" into "Sex: Male", etc. (best-effort)
-  dfp$label <- gsub("([A-Za-z_]+)(.*)", "\\1\\2", dfp$term)
-  dfp$label <- gsub(":", ": ", dfp$label)
-  # order by HR
-  dfp$label <- factor(dfp$label, levels = rev(dfp$label[order(dfp$HR)]))
-  
-  # x limits from finite CIs
-  xmin <- max(min(dfp$LCL, na.rm = TRUE), 1e-3)
-  xmax <- min(max(dfp$UCL, na.rm = TRUE), 1e3)
-  
-  p <- ggplot(dfp, aes(x = HR, y = label)) +
-    geom_vline(xintercept = 1, linetype = 2) +
-    geom_errorbarh(aes(xmin = LCL, xmax = UCL), height = 0.2) +
-    geom_point(size = 2.5) +
-    scale_x_log10(limits = c(xmin, xmax)) +
-    labs(title = title, x = "Hazard ratio (log scale)", y = NULL,
-         caption = "Rows with infinite estimates were omitted from the plot") +
-    theme_minimal(base_size = 12)
-  ggsave(file, plot = p, width = 7, height = 6, dpi = 150)
-  message("[OK] Saved ", file)
-}
-
-# try ggforest, then penalized, then manual
-safe_ggforest <- function(fit, data, file, title) {
-  ok <- FALSE
-  # 1) vanilla ggforest
-  try({
-    fp <- ggforest(fit, data = data,
-                   main = title,
-                   cpositions = c(0.02, 0.22, 0.4),
-                   fontsize = 1.0,
-                   refLabel = "Reference",
-                   noDigits = 2)
-    ggsave(file, plot = fp, width = 7, height = 6, dpi = 150)
-    message("[OK] Saved ", file)
-    ok <- TRUE
-  }, silent = TRUE)
-  
-  if (!ok) {
-    message("[INFO] ggforest failed; refitting with ridge penalty on Stage for plot.")
-    # penalize the problematic factor (Stage); keep others unpenalized
-    # (If your stage column is named 'Stage', use ridge(Stage); if 'Stage2', change accordingly.)
-    form <- formula(update(formula(fit), . ~ .))
-    # try to detect the Stage term name used in the model matrix
-    stage_term <- NULL
-    for (cand in c("Stage", "Stage2")) if (any(grepl(paste0("^", cand), names(model.matrix(fit))))) stage_term <- cand
-    if (is.null(stage_term)) stage_term <- "Stage"  # default guess
-    
-    fit_pen <- try(coxph(update(formula(fit), paste0(". ~ . - ", stage_term, " + ridge(", stage_term, ")")),
-                         data = data, ties = "efron"), silent = TRUE)
-    
-    if (!inherits(fit_pen, "try-error")) {
-      try({
-        fp2 <- ggforest(fit_pen, data = data,
-                        main = paste0(title, " (ridge-penalized ", stage_term, ")"),
-                        cpositions = c(0.02, 0.22, 0.4),
-                        fontsize = 1.0,
-                        refLabel = "Reference",
-                        noDigits = 2)
-        ggsave(file, plot = fp2, width = 7, height = 6, dpi = 150)
-        message("[OK] Saved ", file, " (penalized)")
-        ok <- TRUE
-      }, silent = TRUE)
-    }
-  }
-  
-  if (!ok) {
-    message("[INFO] ggforest still failed; drawing manual forest.")
-    manual_forest(fit, title = title, file = file)
-  }
-}
-
-# --- call the safe plotter for your two models -----------------------------
-p<-safe_ggforest(cox_multi_os,  df[keep_os, ],
-              file = "forestplot_os_multivariable_safe.png",
-              title = "Hazard ratios for OS (multivariable)")
-
-p2<-safe_ggforest(cox_multi_dfs, df[keep_dfs, ],
-              file = "forestplot_pfs_multivariable.png",
-              title = "Hazard ratios for PFS (multivariable)")
-
-
-
+# --- Forest plots ----------------------------------------------------------
 # --- Stage collapse: I/II vs III/IV ---------------------------------------
 stage_raw <- toupper(trimws(as.character(
   df$Neoplasm_Disease_Stage_American_Joint_Committee_on_Cancer_Code
@@ -313,7 +201,8 @@ fp_os <- ggforest(
   refLabel = "Reference",
   noDigits = 2
 )
-ggsave(file.path(OUT_DIR, "forestplot_os_multivariable.png"), plot = fp_os, width = 7, height = 6, dpi = 150)
+print(fp_os)
+ggsave("plots/forestplot_os_multivariable.png", plot = fp_os, width = 7, height = 6, dpi = 150)
 
 fp_dfs <- ggforest(
   cox_multi_dfs, data = d_dfs,
@@ -323,5 +212,6 @@ fp_dfs <- ggforest(
   refLabel = "Reference",
   noDigits = 2
 )
-ggsave(file.path(OUT_DIR, "forestplot_pfs_multivariable.png"), plot = fp_dfs, width = 7, height = 6, dpi = 150)
+print(fp_dfs)
+ggsave("plots/forestplot_pfs_multivariable.png", plot = fp_dfs, width = 7, height = 6, dpi = 150)
 
