@@ -122,7 +122,6 @@ The analysis expects a CSV with at least these columns (TCGA-style):
 
 If you use this code or figures, please cite:
 
-> Hasan MT, et al. CXCL13 expression is associated with improved survival in muscle-invasive bladder cancer (TCGA-BLCA). (Conference presentation, 2025). GitHub repository: `<add your repo URL>`.
 
 You may also include a license badge and DOI (Zenodo) once minted.
 
@@ -135,10 +134,6 @@ Choose one and add `LICENSE` at repo root:
 
 ## ✉️ Contact
 
-For questions or issues, please open a GitHub issue or contact:
-
-**Mohammad Tanvir Hasan**  
-📧 [mthasan@ualr.edu](mailto:mthasan@ualr.edu)
 
 ---
 
