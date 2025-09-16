@@ -23,8 +23,6 @@ Reproducible analysis and figures for our study evaluating CXCL13 expression as 
 │   ├── km_dfs_CXCL13_annot.png
 │   ├── forestplot_os_multivariable.png
 │   ├── forestplot_pfs_multivariable.png
-│   ├── forestplot_os_multivariable_stage2.png
-│   ├── forestplot_pfs_multivariable_stage2.png
 │   ├── CXCL13_highrisk_samples.csv
 │   └── CXCL13_lowrisk_samples.csv
 └── README.md
