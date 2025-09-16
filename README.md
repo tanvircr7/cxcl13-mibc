@@ -120,16 +120,6 @@ The analysis expects a CSV with at least these columns (TCGA-style):
 
 **If you cannot include TCGA data in the repo**, add a short `data/README.md` describing how to obtain it from GDC/Firehose and how to preprocess to this schema.
 
-## 🧪 Reproducibility Notes
-
-- All outputs are written under `output/` using relative paths (OS-agnostic)
-- The script includes cautious handling for:
-  - Factor level separation in Cox models (Stage collapse; ridge-penalized fallback for plotting)
-  - Minor column naming differences between PFS and DFS fields
-  - Missing risk-table objects in survminer to avoid save errors
-
-## 🛠 Troubleshooting
-
 ### Error: "no package called 'survminer'"
 
 **Solution**: Install required packages from R:
